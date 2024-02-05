@@ -99,15 +99,17 @@ def load_documents(source_dir: str) -> list[Document]:
 
 def split_documents(documents: list[Document]) -> tuple[list[Document], list[Document]]:
     # Splits documents for correct Text Splitter
-    text_docs, python_docs = [], []
+    text_docs, python_docs, java_docs = [], [], []
     for doc in documents:
         if doc is not None:
            file_extension = os.path.splitext(doc.metadata["source"])[1]
            if file_extension == ".py":
                python_docs.append(doc)
+            if file_extension == ".java":
+               java_docs.append(doc)
            else:
                text_docs.append(doc)
-    return text_docs, python_docs
+    return text_docs, python_docs, java_docs
 
 
 @click.command()
@@ -143,13 +145,18 @@ def main(device_type):
     # Load documents and split in chunks
     logging.info(f"Loading documents from {SOURCE_DIRECTORY}")
     documents = load_documents(SOURCE_DIRECTORY)
-    text_documents, python_documents = split_documents(documents)
+    text_documents, python_documents, java_documents = split_documents(documents)
     text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
+    # how does it know to split the python documents?/ does this work with other languages?
     python_splitter = RecursiveCharacterTextSplitter.from_language(
         language=Language.PYTHON, chunk_size=880, chunk_overlap=200
     )
+    java_splitter = RecursiveCharacterTextSplitter.from_language(
+        language=Language.JAVA, chunk_size=880, chunk_overlap=200
+    )
     texts = text_splitter.split_documents(text_documents)
     texts.extend(python_splitter.split_documents(python_documents))
+    texts.extend(python_splitter.split_documents(java_documents))
     logging.info(f"Loaded {len(documents)} documents from {SOURCE_DIRECTORY}")
     logging.info(f"Split into {len(texts)} chunks of text")
 

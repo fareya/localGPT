@@ -20,7 +20,7 @@ from werkzeug.utils import secure_filename
 from constants import CHROMA_SETTINGS, EMBEDDING_MODEL_NAME, PERSIST_DIRECTORY, MODEL_ID, MODEL_BASENAME
 
 
-DEVICE_TYPE = "cpu"
+DEVICE_TYPE = "cuda"
 # if torch.backends.mps.is_available():
 #     DEVICE_TYPE = "mps"
 # elif torch.cuda.is_available():
@@ -76,7 +76,7 @@ QA = RetrievalQA.from_chain_type(
         "prompt": prompt,
     },
 )
-user_prompt="Please tell me a joke"
+user_prompt="How can I load a source code as documents, for a QA over code, spliting the code in classes and functions?"
 res = QA(user_prompt)
 answer, docs = res["result"], res["source_documents"]
 print(answer)
